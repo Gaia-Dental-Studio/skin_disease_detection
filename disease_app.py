@@ -14,7 +14,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 if uploaded_file is not None:
     # Display the uploaded image
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", width=500)
 
     # Send the image to the backend API
     if st.button("Predict"):
@@ -33,8 +33,8 @@ if uploaded_file is not None:
                 if response.status_code == 200:
                     result = response.json()
                     st.success(f"Predicted Class: {result['predicted_class']}")
-                    st.write(f"Confidence: {result['confidence']:.2f}")
-                    st.write("Confidence Scores for All Classes:")
+                    st.write(f"Confidence: {result['confidence']}")
+                    st.write("Confidence Scores for all categories with threshold above 50%:")
                     st.json(result['class_confidences'])
                 else:
                     st.error(f"Error: {response.json().get('error', 'Unknown error')}")

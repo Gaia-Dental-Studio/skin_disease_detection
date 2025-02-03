@@ -45,19 +45,39 @@ def predict():
         preprocessed_img = preprocess_image(temp_path)
         predictions = model.predict(preprocessed_img)[0]
         predicted_class_idx = np.argmax(predictions)
-        confidence = predictions[predicted_class_idx]
         predicted_class = class_labels[predicted_class_idx]
-        class_confidences = {class_labels[i]: float(predictions[i]) for i in range(len(class_labels))}
+        
+        # Use the following for decimal result format  
+        # confidence = round(predictions[predicted_class_idx], 2)
+        # class_confidences = {class_labels[i]: round(float(predictions[i]), 2) for i in range(len(class_labels))}
+
+        # Use the following for percentage result format
+        confidence = round(predictions[predicted_class_idx] * 100, 2)
+        
+        # Create and sort class confidence scores in descending order
+        class_confidences = {class_labels[i]: round(float(predictions[i]) * 100, 2) for i in range(len(class_labels))}
+        sorted_confidences = dict(sorted(class_confidences.items(), key=lambda item: item[1], reverse=True))
+
+        # Filter scores above threshold (50%)
+        filtered_confidences = {k: f"{v}%" for k, v in sorted_confidences.items() if v >= 50}
 
         # Clean up temporary file
         os.remove(temp_path)
 
-        # Return JSON response
+        # Return JSON response for decimal format
+        # return jsonify({
+        #     'predicted_class': predicted_class,
+        #     'confidence': float(confidence),
+        #     'class_confidences': class_confidences
+        # })
+
+        # Return JSON response for percentage format
         return jsonify({
             'predicted_class': predicted_class,
-            'confidence': float(confidence),
-            'class_confidences': class_confidences
+            'confidence': f"{str(confidence)}%",  # Format as a percentage string
+            'class_confidences': filtered_confidences
         })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
