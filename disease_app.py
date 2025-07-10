@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 from PIL import Image
 import os
+import plotly.express as px
+import pandas as pd
 import tempfile
 
 # Define the backend API URL
@@ -40,6 +42,44 @@ if uploaded_file is not None:
                     
                     st.success(f"✅ Prediction: **{result['predicted_class']['en']}** ({result['predicted_class']['id']})")
                     st.write(f"🔍 Confidence: **{result['confidence']}**")
+
+                    # Expandable: Show all class confidences
+                    with st.expander("📊 Show All Class Confidences"):
+                        st.write("Confidence scores for all predicted classes:")
+                        # Sort again just to ensure descending order
+                        # sorted_conf = sorted(result['all_confidence'].items(), key=lambda item: item[1], reverse=True)
+
+                        # for label, score in sorted_conf:
+                        #     st.write(f"- **{label}**: {score}%")
+                        
+                        # Convert and sort the confidence dict
+                        sorted_conf = sorted(result['all_confidence'].items(), key=lambda item: item[1], reverse=True)
+                        labels, scores = zip(*sorted_conf)
+                        conf_df = pd.DataFrame({'Class': labels, 'Confidence (%)': scores})
+
+                        # Plot horizontal bar chart
+                        # Create bar chart with value labels
+                        fig = px.bar(
+                            conf_df,
+                            x="Confidence (%)",
+                            y="Class",
+                            orientation="h",
+                            title="Class Confidence Scores",
+                            text="Confidence (%)"  # Show values
+                        )
+
+                        fig.update_traces(
+                            marker_color='steelblue',     # Single solid color
+                            textposition='outside'        # Put values at the end of the bars
+                        )
+
+                        fig.update_layout(
+                            yaxis={'categoryorder': 'total ascending'},
+                            plot_bgcolor='white',
+                            xaxis_range=[0, 100],  # Optional: always show full scale
+                        )
+
+                        st.plotly_chart(fig, use_container_width=True)
                     
                     st.subheader("📝 Description")
                     st.markdown(f"- **EN**: {result['description']['en']}")

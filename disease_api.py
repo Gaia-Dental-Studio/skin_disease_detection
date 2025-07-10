@@ -59,8 +59,8 @@ def predict():
         confidence = round(predictions[predicted_class_idx] * 100, 2)
         
         # Create and sort class confidence scores in descending order
-        # class_confidences = {class_labels[i]: round(float(predictions[i]) * 100, 2) for i in range(len(class_labels))}
-        # sorted_confidences = dict(sorted(class_confidences.items(), key=lambda item: item[1], reverse=True))
+        class_confidences = {class_labels[i]: round(float(predictions[i]) * 100, 2) for i in range(len(class_labels))}
+        sorted_confidences = dict(sorted(class_confidences.items(), key=lambda item: item[1], reverse=True))
 
         # # Filter scores above threshold (50%)
         # filtered_confidences = {k: f"{v}%" for k, v in sorted_confidences.items() if v >= 50}
@@ -84,6 +84,7 @@ def predict():
                     'en':predicted_class
                 },
                 'confidence': f"{str(confidence)}%",  # Format as a percentage string
+                'all_confidence': sorted_confidences,
                 'description':{
                     'id':data['desc_in'].iloc[0],
                     'en':data['desc_eng'].iloc[0] 
